@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Time Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 12px;
+        }
+
+        .field-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="number"] {
+            width: 200px;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #007aff;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            font-family: inherit;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #007aff;
+        }
+
+        .word-counter {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .word-counter span {
+            font-weight: 600;
+            color: #007aff;
+            font-size: 1.2rem;
+        }
+
+        .manual-word-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .manual-word-input input {
+            width: 100px;
+            padding: 6px;
+            font-size: 14px;
+        }
+
+        .result {
+            background: #e8f0fe;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .result-time {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007aff;
+            margin: 10px 0;
+        }
+
+        .result-detail {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .info {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Reading Time Calculator</h1>
+
+        <!-- Reading speed field -->
+        <div class="field-group">
+            <label>⚡ Reading speed (words per minute):</label>
+            <input type="number" id="speed" value="180" step="10" min="1">
+        </div>
+
+        <!-- Text input field -->
+        <div class="field-group">
+            <label>📝 Text to analyze:</label>
+            <textarea id="textInput" rows="8" placeholder="Paste or type your text here..."></textarea>
+            
+            <!-- Word counter block -->
+            <div class="word-counter">
+                <div>📊 Word count:</div>
+                <span id="wordCount">0</span>
+                
+                <div class="manual-word-input">
+                    <span style="font-weight:normal;">Or enter manually:</span>
+                    <input type="number" id="manualWords" value="0" step="10" min="0" placeholder="Enter number">
+                </div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div class="result">
+            <div>⏱️ Reading time:</div>
+            <div class="result-time" id="readingTime">0 min</div>
+            <div class="result-detail" id="detailInfo"></div>
+        </div>
+
+        <hr>
+
+        <div class="info">
+            💡 Tip: You can either paste text in the field above (word count updates automatically),<br>
+            or manually enter the word count in the field next to the counter.
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const speedInput = document.getElementById('speed');
+        const textArea = document.getElementById('textInput');
+        const wordCountSpan = document.getElementById('wordCount');
+        const manualWordsInput = document.getElementById('manualWords');
+        const readingTimeSpan = document.getElementById('readingTime');
+        const detailInfoSpan = document.getElementById('detailInfo');
+
+        // Function to count words in text
+        function countWords(text) {
+            // Remove extra spaces, split by whitespace, filter out empty strings
+            return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        }
+
+        // Function to update word count from text
+        function updateWordCountFromText() {
+            const text = textArea.value;
+            const words = countWords(text);
+            wordCountSpan.textContent = words;
+            
+            // If user hasn't touched manual input, sync it
+            if (!manualWordsInput.disabled && document.activeElement !== manualWordsInput) {
+                manualWordsInput.value = words;
+            }
+            
+            return words;
+        }
+
+        // Function to get current word count (manual input takes priority if changed)
+        function getCurrentWordCount() {
+            const manualVal = parseInt(manualWordsInput.value, 10);
+            const autoVal = parseInt(wordCountSpan.textContent, 10);
+            
+            if (!isNaN(manualVal) && manualVal !== autoVal) {
+                return manualVal;
+            }
+            return autoVal;
+        }
+
+        // Function to calculate and display reading time
+        function calculateReadingTime() {
+            // Get reading speed
+            const speed = parseInt(speedInput.value, 10);
+            
+            // Get word count
+            let wordCount = getCurrentWordCount();
+            
+            // Validate
+            if (isNaN(wordCount) || wordCount < 0) {
+                wordCount = 0;
+            }
+            
+            if (isNaN(speed) || speed <= 0) {
+                readingTimeSpan.textContent = '⚠️ Error';
+                detailInfoSpan.textContent = 'Please enter a valid reading speed';
+                return;
+            }
+            
+            // Calculate time in minutes
+            let minutes = wordCount / speed;
+            
+            // Format output
+            let timeString = '';
+            let detailString = '';
+            
+            if (wordCount === 0) {
+                timeString = '0 min';
+                detailString = 'No words to count';
+            } else if (minutes < 1) {
+                // Less than a minute — show in seconds
+                const seconds = Math.round(minutes * 60);
+                timeString = `${seconds} sec`;
+                detailString = `${wordCount} words × 60 sec / ${speed} wpm = ${seconds} seconds`;
+            } else if (minutes < 60) {
+                // Between 1 and 60 minutes
+                const roundedMinutes = Math.round(minutes * 10) / 10;
+                timeString = `${roundedMinutes} min`;
+                detailString = `${wordCount} words / ${speed} wpm = ${roundedMinutes} minutes`;
+            } else {
+                // More than an hour
+                const hours = Math.floor(minutes / 60);
+                const remainingMinutes = Math.round(minutes % 60);
+                timeString = `${hours} hr ${remainingMinutes} min`;
+                detailString = `${wordCount} words / ${speed} wpm = ${hours} hr ${remainingMinutes} min`;
+            }
+            
+            readingTimeSpan.textContent = timeString;
+            detailInfoSpan.textContent = detailString;
+        }
+
+        // Event handlers
+        function onTextChange() {
+            updateWordCountFromText();
+            calculateReadingTime();
+        }
+        
+        function onManualWordsChange() {
+            const manualVal = parseInt(manualWordsInput.value, 10);
+            if (!isNaN(manualVal) && manualVal >= 0) {
+                wordCountSpan.textContent = manualVal;
+                calculateReadingTime();
+            }
+        }
+        
+        function onSpeedChange() {
+            calculateReadingTime();
+        }
+        
+        // Attach event listeners
+        speedInput.addEventListener('input', onSpeedChange);
+        textArea.addEventListener('input', onTextChange);
+        manualWordsInput.addEventListener('input', onManualWordsChange);
+        
+        // Initialize
+        updateWordCountFromText();
+        calculateReadingTime();
+        
+        // Add tooltip behavior for manual input
+        manualWordsInput.addEventListener('focus', function() {
+            this.placeholder = 'Enter word count';
+        });
+        
+        manualWordsInput.addEventListener('blur', function() {
+            let val = parseInt(this.value, 10);
+            if (isNaN(val) || val < 0) {
+                val = 0;
+                this.value = 0;
+            }
+            wordCountSpan.textContent = val;
+            calculateReadingTime();
+            this.placeholder = 'Enter number';
+        });
+    </script>
+</body>
+</html>
