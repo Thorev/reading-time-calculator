@@ -1,5 +1,4 @@
-# reading-time-calculator
-Reading Time Calculator
+## reading-time-calculator
 
 What this calculator does
 
