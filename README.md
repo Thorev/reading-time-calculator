@@ -1,5 +1,5 @@
 <img width="555" height="514" alt="Screenshot" src="https://github.com/user-attachments/assets/e7ebdc9c-da7e-4fc2-af3d-1dd1ca84f443" />
-## reading-time-calculator
+
 
 
 What this calculator does:
